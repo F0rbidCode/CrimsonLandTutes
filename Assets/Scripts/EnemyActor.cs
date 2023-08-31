@@ -22,8 +22,7 @@ public class EnemyActor : MonoBehaviour
         toTarget = player.transform.position - this.transform.position;
         toTarget = toTarget.normalized;
         //move the enemy towards the target
-        this.transform.position += toTarget * Time.deltaTime * Speed;
-        
+        this.transform.position += toTarget * Speed * Time.deltaTime;        
         
     }
 }

@@ -11,6 +11,18 @@ public class PlayerActor : MonoBehaviour
 
     public float speed = 5.0f; //set the players movement speed
 
+    //public float projectileSpeed;
+
+    public enum WeaponType //set and switch between the available weapons 
+    {
+        WAPON_HITSCAN,
+        WEAPON_SINGLESHOT,
+    }
+
+    public WeaponType weapon_type;
+
+    public GameObject projectile;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,36 +51,73 @@ public class PlayerActor : MonoBehaviour
         {
             move_direction.Set(1, 0, 0);
         }
-        controller.Move(move_direction * Time.deltaTime * speed);
+        controller.Move(move_direction * speed * Time.deltaTime);
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            switch(weapon_type)
+            {
+                case WeaponType.WAPON_HITSCAN:
+                    FireHitscan();
+                    break;
+
+                case WeaponType.WEAPON_SINGLESHOT:
+                    FireSingleShot();
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        
+    }
+
+    //function used to get fire direction
+    Vector3 GetFireDirection()
+    {
+        Vector3 mouse_pos = Input.mousePosition; //get the mouse position
+
+        Ray mouse_ray = Camera.main.ScreenPointToRay(mouse_pos); //use the current camera to cnver mouse position to a ray
+
+        Plane player_plane = new Plane(Vector3.up, transform.position); //create a plane that faces the same position as the player
+
+        float ray_distance = 0;
+        player_plane.Raycast(mouse_ray, out ray_distance); //claculate the distance along the ray that the intersect occurs
+
+        Vector3 cast_point = mouse_ray.GetPoint(ray_distance); //use the ray distance to calculate the point of collision
+
+        Vector3 to_cast_point = cast_point - transform.position;
+        to_cast_point.Normalize(); //get the vector in the direction to the point
+
+        return to_cast_point;
+    }
+
+    void FireSingleShot()
+    {
+        Vector3 fire_direction = GetFireDirection();
+        Vector3 spawnLocation = this.transform.position + fire_direction;
 
 
+        GameObject p = Instantiate(projectile, spawnLocation, Quaternion.LookRotation(fire_direction)) as GameObject;
+
+    } 
+
+
+    void FireHitscan()
+    {
         ////////////////////////////////////////////
         ///Destroying an enemy
         /////////////////////////////////////////////
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 mouse_pos = Input.mousePosition; //get the mouse position
-
-            Ray mouse_ray = Camera.main.ScreenPointToRay(mouse_pos); //use the current camera to cnver mouse position to a ray
-
-            Plane player_plane = new Plane(Vector3.up, transform.position); //create a plane that faces the same position as the player
-
-            float ray_distance = 0;
-            player_plane.Raycast(mouse_ray, out ray_distance); //claculate the distance along the ray that the intersect occurs
-
-            Vector3 cast_point = mouse_ray.GetPoint(ray_distance); //use the ray distance to calculate the point of collision
-
-            Vector3 to_cast_point = cast_point - transform.position;
-            to_cast_point.Normalize(); //get the vector in the direction to the point
-            Ray fire_ray = new Ray(transform.position, to_cast_point); //cast a ray along that direction
+       
+           Vector3 fire_direction = GetFireDirection();
+            Ray fire_ray = new Ray(transform.position, fire_direction); //cast a ray along that direction
 
             RaycastHit info;
-            if (Input.GetMouseButtonDown(0) && Physics.Raycast(fire_ray, out info)) //if the ray hits a target
+            if (Physics.Raycast(fire_ray, out info)) //if the ray hits a target
             {
                 if (info.collider.tag == "Enemy") //check that the ray hits an enemy
                     Destroy(info.collider.gameObject); //destroy the target
             }
-        }
         
     }
 }

@@ -157,6 +157,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
+  weapon_type: 1
+  projectile: {fileID: 2153733730571327671, guid: 3eada389b4c32344291e7d58a0cb2e72, type: 3}
 --- !u!143 &200135897
 CharacterController:
   m_ObjectHideFlags: 0
