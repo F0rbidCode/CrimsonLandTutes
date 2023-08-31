@@ -5,6 +5,10 @@ using UnityEngine;
 public class CameraActor : MonoBehaviour
 {
     public Transform target; //store a referance to the target (player)
+    public float speed = 5.0f; //controles how fast the camera will move
+
+    [HideInInspector]
+    public Vector3 offset;
 
     private Vector3 boom; //used to controle the distance between the player and the camera
 
@@ -20,7 +24,11 @@ public class CameraActor : MonoBehaviour
     void Update()
     {
         //Set our position to be the same relative to the player
-        Vector3 target_pos = target.position + boom;
-        this.transform.position = target_pos;
+        Vector3 target_pos = target.position + boom + offset;
+
+        //this.transform.position = target_pos;
+
+        //smoothly move the camera to centre on the player
+        this.transform.position = Vector3.Lerp(transform.position, target_pos, speed * Time.deltaTime);
     }
 }

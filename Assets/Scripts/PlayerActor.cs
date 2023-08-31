@@ -19,9 +19,10 @@ public class PlayerActor : MonoBehaviour
         WEAPON_SINGLESHOT,
     }
 
-    public WeaponType weapon_type;
+    public WeaponType weapon_type; //used to select weapon type
 
-    public GameObject projectile;
+    public GameObject projectile; //referance to the projectile prefab
+    public CameraActor camera_actor; //referance to the game camera
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +35,8 @@ public class PlayerActor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+       
+
         Vector3 move_direction = new Vector3(0, 0, 0);
         if (Input.GetKey(KeyCode.W))
         {
@@ -68,8 +71,13 @@ public class PlayerActor : MonoBehaviour
                     break;
             }
         }
-        
-        
+
+        Vector3 fire_direction = GetFireDirection(); //get the direction we want to fire in
+        transform.forward = fire_direction; //rotate the player to face that direction
+
+        //camera_actor.offset = fire_direction; //set the camera offset to the fire direction
+
+        camera_actor.offset = move_direction * speed;//set camera offset to move direction
     }
 
     //function used to get fire direction
