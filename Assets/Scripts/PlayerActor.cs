@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.Serialization;
 
 public class PlayerActor : MonoBehaviour
 {
     //initialise the player controller variable
-    private CharacterController controller;
+      private CharacterController controller;
 
     public float speed = 5.0f; //set the players movement speed
+
+    private PlayerInput _playerInput;
+    private float _playersMovementDirection;
+    
 
     //public float projectileSpeed;
 
@@ -24,39 +32,52 @@ public class PlayerActor : MonoBehaviour
     public GameObject projectile; //referance to the projectile prefab
     public CameraActor camera_actor; //referance to the game camera
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         //get the chacter controller from the object in the scene
         controller = gameObject.GetComponent<CharacterController>();
+        //get player Input controller
+        _playerInput = new PlayerInput();
         
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-       
+        _playerInput.Enable();//enable player input
+    }
 
-        Vector3 move_direction = new Vector3(0, 0, 0);
-        if (Input.GetKey(KeyCode.W))
-        {
-            move_direction.Set(0, 0, 1);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            move_direction.Set(0, 0, -1);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            move_direction.Set(-1, 0, 0);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            move_direction.Set(1, 0, 0);
-        }
+    private void OnDisable()
+    {
+        _playerInput.Disable(); //disable player input
+    }
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    //private void OnMove()
+    //{
+    //
+    //}
+
+    // Update is called once per frame
+    void Update()   
+    {
+        /////////////////////////////////////////
+        ////Player Movement
+        ////////////////////////////////////////
+        Vector2 moveInput = _playerInput.Land.Move.ReadValue<Vector2>();
+
+        Vector3 move_direction = new Vector3(moveInput.x, 0, moveInput.y);
         controller.Move(move_direction * speed * Time.deltaTime);
-
-        if(Input.GetMouseButtonDown(0))
+       
+        ///////////////////////////////////////
+        /////Attack
+        //////////////////////////////////////
+        if (_playerInput.Land.Attack.WasPressedThisFrame())
         {
             switch(weapon_type)
             {
@@ -77,13 +98,17 @@ public class PlayerActor : MonoBehaviour
 
         //camera_actor.offset = fire_direction; //set the camera offset to the fire direction
 
-        camera_actor.offset = move_direction * speed;//set camera offset to move direction
+        //camera_actor.offset = move_direction * speed;//set camera offset to move direction
     }
+
+
+   
 
     //function used to get fire direction
     Vector3 GetFireDirection()
     {
-        Vector3 mouse_pos = Input.mousePosition; //get the mouse position
+        //Vector3 mouse_pos = Input.mousePosition; //get the mouse position
+        Vector3 mouse_pos = Mouse.current.position.ReadValue(); //get the mouse position
 
         Ray mouse_ray = Camera.main.ScreenPointToRay(mouse_pos); //use the current camera to cnver mouse position to a ray
 
